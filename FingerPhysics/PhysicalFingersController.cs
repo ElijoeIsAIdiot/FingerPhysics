@@ -5,6 +5,8 @@ using Il2CppSLZ.Marrow.Interaction;
 using Il2CppSLZ.VRMK;
 using UnityEngine;
 using System.Collections.Generic;
+using BoneLib;
+using Avatar = Il2CppSLZ.VRMK.Avatar;
 
 namespace FingerPhysics;
 
@@ -72,6 +74,23 @@ public class PhysicalFingersController : MonoBehaviour
             middle.SetCollisions(!_previousAttachedState);
             ring.SetCollisions(!_previousAttachedState);
             pinky.SetCollisions(!_previousAttachedState);
+        }
+
+        if (Vector3.Distance(targetPhysHand.transform.position, Player.Head.position) >= 30)
+        {
+            if (!thumb.locked) thumb.LockJoints();
+            if (!index.locked) index.LockJoints();
+            if (!middle.locked) middle.LockJoints();
+            if (!ring.locked) ring.LockJoints();
+            if (!pinky.locked) pinky.LockJoints();
+        }
+        else
+        {
+            if (thumb.locked) thumb.FreeJoints();
+            if (index.locked) index.FreeJoints();
+            if (middle.locked) middle.FreeJoints();
+            if (ring.locked) ring.FreeJoints();
+            if (pinky.locked) pinky.FreeJoints();
         }
     }
 

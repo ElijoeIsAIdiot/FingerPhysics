@@ -9,7 +9,7 @@ namespace FingerPhysics;
 [RegisterTypeInIl2Cpp]
 public class PhysicalFinger : MonoBehaviour
 {
-    public const float fingerSectionMass = 0.5f;
+    public const float fingerSectionMass = 0f;
 
     public PhysicalFingersController controllerReference
     {
@@ -43,6 +43,8 @@ public class PhysicalFinger : MonoBehaviour
     public ConfigurableJoint distalJoint;
     public Transform distalArtOffset;
 
+    public bool locked;
+
     public static PhysicalFinger CreateFinger(PhysHand handBody, Transform proxTarget, Transform intTarget, Transform distTarget, string name, Transform parent)
     {
         // Individual Finger Parent (might not be needed considering transform position performance, we will see)
@@ -59,7 +61,7 @@ public class PhysicalFinger : MonoBehaviour
             (_, physFinger.proximalBody, physFinger.proximalCol, physFinger.proximalJoint, physFinger.proximalArtOffset) = CreateFingerBone("Proximal", handBody.rbHand, proxTarget, intTarget.localPosition.magnitude, 0.01f, intTarget.localPosition / 2, true, handBody.rbHand.rotation * physFinger.handChildOffsetRotation);
             physFinger.proximalJoint.axis = Vector3.right;
             physFinger.proximalJoint.angularXMotion = ConfigurableJointMotion.Limited;
-            //physFinger.proximalJoint.angularYMotion = ConfigurableJointMotion.Limited;
+            physFinger.proximalJoint.angularYMotion = ConfigurableJointMotion.Limited;
             physFinger.proximalJoint.highAngularXLimit = new SoftJointLimit()
             {
                 limit = 25f,
@@ -72,18 +74,21 @@ public class PhysicalFinger : MonoBehaviour
                 bounciness = 0,
                 contactDistance = 0
             }; 
-            //physFinger.proximalJoint.angularYLimit = new SoftJointLimit()
-            //{
-            //    limit = 45f,
-            //    bounciness = 0,
-            //    contactDistance = 0
-            //};
+            physFinger.proximalJoint.angularYLimit = new SoftJointLimit()
+            {
+                limit = 45f,
+                bounciness = 0,
+                contactDistance = 0
+            };
             physFinger.proximalJoint.slerpDrive = new JointDrive()
             {
                 positionSpring = 2000f,
-                positionDamper = 200f,
+                positionDamper = 20f,
                 maximumForce = physFinger.proximalJoint.slerpDrive.maximumForce
-            };
+            }
+            ;
+
+            //physFinger.proximalJoint.connectedMassScale = 0;
         }
 
         // Create Intermediate Bone
@@ -98,6 +103,7 @@ public class PhysicalFinger : MonoBehaviour
                 bounciness = 0,
                 contactDistance = 0
             };
+            //physFinger.intermediateJoint.connectedMassScale = 0;
         }
 
         // Create Distal Bone
@@ -112,6 +118,7 @@ public class PhysicalFinger : MonoBehaviour
                 bounciness = 0,
                 contactDistance = 0
             };
+            //physFinger.distalJoint.connectedMassScale = 0;
         }
 
         physFinger.UpdateFingerAnchors();
@@ -149,7 +156,7 @@ public class PhysicalFinger : MonoBehaviour
             boneJoint.slerpDrive = new JointDrive()
             {
                 positionSpring = 1000f,
-                positionDamper = 50f,
+                positionDamper = 5f,
                 maximumForce = boneJoint.slerpDrive.maximumForce
             };
             boneJoint.projectionMode = JointProjectionMode.PositionAndRotation;
@@ -239,5 +246,43 @@ public class PhysicalFinger : MonoBehaviour
 
         intermediateJoint.targetRotation = Quaternion.AngleAxis(Quaternion.Angle(Quaternion.identity, intermediateTarget.localRotation), Vector3.right);
         distalJoint.targetRotation = Quaternion.AngleAxis(Quaternion.Angle(Quaternion.identity, distalTarget.localRotation), Vector3.right);
+
+        
+    }
+
+    public void FreeJoints()
+    {
+        proximalJoint.angularXMotion = ConfigurableJointMotion.Limited;
+        proximalJoint.angularYMotion = ConfigurableJointMotion.Free;
+        proximalJoint.angularZMotion = ConfigurableJointMotion.Free;
+
+        intermediateJoint.angularXMotion = ConfigurableJointMotion.Limited;
+        intermediateJoint.angularYMotion = ConfigurableJointMotion.Locked;
+        intermediateJoint.angularZMotion = ConfigurableJointMotion.Locked;
+
+        distalJoint.angularXMotion = ConfigurableJointMotion.Limited;
+        distalJoint.angularYMotion = ConfigurableJointMotion.Locked;
+        distalJoint.angularZMotion = ConfigurableJointMotion.Locked;
+
+        //distalJoint.autoConfigureConnectedAnchor = true;
+        locked = false;
+    }
+
+    public void LockJoints()
+    {
+        proximalJoint.angularXMotion = ConfigurableJointMotion.Locked;
+        proximalJoint.angularYMotion = ConfigurableJointMotion.Locked;
+        proximalJoint.angularZMotion = ConfigurableJointMotion.Locked;
+
+        intermediateJoint.angularXMotion = ConfigurableJointMotion.Locked;
+        intermediateJoint.angularYMotion = ConfigurableJointMotion.Locked;
+        intermediateJoint.angularZMotion = ConfigurableJointMotion.Locked;
+
+        distalJoint.angularXMotion = ConfigurableJointMotion.Locked;
+        distalJoint.angularYMotion = ConfigurableJointMotion.Locked;
+        distalJoint.angularZMotion = ConfigurableJointMotion.Locked;
+
+
+        locked = true;
     }
 }
