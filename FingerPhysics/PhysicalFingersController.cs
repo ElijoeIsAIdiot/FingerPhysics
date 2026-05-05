@@ -66,9 +66,9 @@ public class PhysicalFingersController : MonoBehaviour
 
         bool attachedOrHovering = attached || hovering;
 
-        if (_previousAttachedState != (targetPhysHand.hand.AttachedReceiver != null))
+        if (_previousAttachedState != (targetPhysHand.hand.AttachedReceiver != null) || thumb.locked)
         {
-            _previousAttachedState = (targetPhysHand.hand.AttachedReceiver != null || targetPhysHand.hand.HoveringReceiver != null);
+            _previousAttachedState = (targetPhysHand.hand.AttachedReceiver != null || targetPhysHand.hand.HoveringReceiver != null) || thumb.locked;
             thumb.SetCollisions(!_previousAttachedState);
             index.SetCollisions(!_previousAttachedState);
             middle.SetCollisions(!_previousAttachedState);
@@ -79,18 +79,28 @@ public class PhysicalFingersController : MonoBehaviour
         if (Vector3.Distance(targetPhysHand.transform.position, Player.Head.position) >= 30)
         {
             if (!thumb.locked) thumb.LockJoints();
+            //thumb.SetCollisions(false);
             if (!index.locked) index.LockJoints();
+            //index.SetCollisions(false);
             if (!middle.locked) middle.LockJoints();
+            //middle.SetCollisions(false);
             if (!ring.locked) ring.LockJoints();
+            //ring.SetCollisions(false);
             if (!pinky.locked) pinky.LockJoints();
+            //pinky.SetCollisions(false);
         }
         else
         {
             if (thumb.locked) thumb.FreeJoints();
+            //thumb.SetCollisions(true);
             if (index.locked) index.FreeJoints();
+            //index.SetCollisions(true);
             if (middle.locked) middle.FreeJoints();
+            //middle.SetCollisions(true);
             if (ring.locked) ring.FreeJoints();
+            //ring.SetCollisions(true);
             if (pinky.locked) pinky.FreeJoints();
+            //pinky.SetCollisions(true);
         }
     }
 

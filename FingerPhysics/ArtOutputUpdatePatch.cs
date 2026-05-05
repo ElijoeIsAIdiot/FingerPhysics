@@ -23,27 +23,33 @@ namespace FingerPhysics
                 if (lastFoundAvatar == null) continue;
                 if(controller.handedness == Handedness.LEFT)
                 {
+                    
                     PhysicalFinger currentFinger = controller.index;
+                    if(currentFinger.locked) return;
                     lastFoundAvatar.artTransforms.leftIndexProximal.SetPositionAndRotation(currentFinger.proximalArtOffset.position, currentFinger.proximalArtOffset.rotation);
                     lastFoundAvatar.artTransforms.leftIndexIntermediate.SetPositionAndRotation(currentFinger.intermediateArtOffset.position, currentFinger.intermediateArtOffset.rotation);
                     lastFoundAvatar.artTransforms.leftIndexDistal.SetPositionAndRotation(currentFinger.distalArtOffset.position, currentFinger.distalArtOffset.rotation);
 
                     currentFinger = controller.middle;
+                    if (currentFinger.locked) return;
                     lastFoundAvatar.artTransforms.leftMiddleProximal.SetPositionAndRotation(currentFinger.proximalArtOffset.position, currentFinger.proximalArtOffset.rotation);
                     lastFoundAvatar.artTransforms.leftMiddleIntermediate.SetPositionAndRotation(currentFinger.intermediateArtOffset.position, currentFinger.intermediateArtOffset.rotation);
                     lastFoundAvatar.artTransforms.leftMiddleDistal.SetPositionAndRotation(currentFinger.distalArtOffset.position, currentFinger.distalArtOffset.rotation);
                     
                     currentFinger = controller.ring;
+                    if (currentFinger.locked) return;
                     lastFoundAvatar.artTransforms.leftRingProximal.SetPositionAndRotation(currentFinger.proximalArtOffset.position, currentFinger.proximalArtOffset.rotation);
                     lastFoundAvatar.artTransforms.leftRingIntermediate.SetPositionAndRotation(currentFinger.intermediateArtOffset.position, currentFinger.intermediateArtOffset.rotation);
                     lastFoundAvatar.artTransforms.leftRingDistal.SetPositionAndRotation(currentFinger.distalArtOffset.position, currentFinger.distalArtOffset.rotation);
                     
                     currentFinger = controller.pinky;
+                    if (currentFinger.locked) return;
                     lastFoundAvatar.artTransforms.leftLittleProximal.SetPositionAndRotation(currentFinger.proximalArtOffset.position, currentFinger.proximalArtOffset.rotation);
                     lastFoundAvatar.artTransforms.leftLittleIntermediate.SetPositionAndRotation(currentFinger.intermediateArtOffset.position, currentFinger.intermediateArtOffset.rotation);
                     lastFoundAvatar.artTransforms.leftLittleDistal.SetPositionAndRotation(currentFinger.distalArtOffset.position, currentFinger.distalArtOffset.rotation);
                     
                     currentFinger = controller.thumb;
+                    if (currentFinger.locked) return;
                     lastFoundAvatar.artTransforms.leftThumbProximal.SetPositionAndRotation(currentFinger.proximalArtOffset.position, currentFinger.proximalArtOffset.rotation);
                     lastFoundAvatar.artTransforms.leftThumbIntermediate.SetPositionAndRotation(currentFinger.intermediateArtOffset.position, currentFinger.intermediateArtOffset.rotation);
                     lastFoundAvatar.artTransforms.leftThumbDistal.SetPositionAndRotation(currentFinger.distalArtOffset.position, currentFinger.distalArtOffset.rotation);
@@ -51,26 +57,31 @@ namespace FingerPhysics
                 else
                 {
                     PhysicalFinger currentFinger = controller.index;
+                    if (currentFinger.locked) return;
                     lastFoundAvatar.artTransforms.rightIndexProximal.SetPositionAndRotation(currentFinger.proximalArtOffset.position, currentFinger.proximalArtOffset.rotation);
                     lastFoundAvatar.artTransforms.rightIndexIntermediate.SetPositionAndRotation(currentFinger.intermediateArtOffset.position, currentFinger.intermediateArtOffset.rotation);
                     lastFoundAvatar.artTransforms.rightIndexDistal.SetPositionAndRotation(currentFinger.distalArtOffset.position, currentFinger.distalArtOffset.rotation);
 
                     currentFinger = controller.middle;
+                    if (currentFinger.locked) return;
                     lastFoundAvatar.artTransforms.rightMiddleProximal.SetPositionAndRotation(currentFinger.proximalArtOffset.position, currentFinger.proximalArtOffset.rotation);
                     lastFoundAvatar.artTransforms.rightMiddleIntermediate.SetPositionAndRotation(currentFinger.intermediateArtOffset.position, currentFinger.intermediateArtOffset.rotation);
                     lastFoundAvatar.artTransforms.rightMiddleDistal.SetPositionAndRotation(currentFinger.distalArtOffset.position, currentFinger.distalArtOffset.rotation);
 
                     currentFinger = controller.ring;
+                    if (currentFinger.locked) return;
                     lastFoundAvatar.artTransforms.rightRingProximal.SetPositionAndRotation(currentFinger.proximalArtOffset.position, currentFinger.proximalArtOffset.rotation);
                     lastFoundAvatar.artTransforms.rightRingIntermediate.SetPositionAndRotation(currentFinger.intermediateArtOffset.position, currentFinger.intermediateArtOffset.rotation);
                     lastFoundAvatar.artTransforms.rightRingDistal.SetPositionAndRotation(currentFinger.distalArtOffset.position, currentFinger.distalArtOffset.rotation);
 
                     currentFinger = controller.pinky;
+                    if (currentFinger.locked) return;
                     lastFoundAvatar.artTransforms.rightLittleProximal.SetPositionAndRotation(currentFinger.proximalArtOffset.position, currentFinger.proximalArtOffset.rotation);
                     lastFoundAvatar.artTransforms.rightLittleIntermediate.SetPositionAndRotation(currentFinger.intermediateArtOffset.position, currentFinger.intermediateArtOffset.rotation);
                     lastFoundAvatar.artTransforms.rightLittleDistal.SetPositionAndRotation(currentFinger.distalArtOffset.position, currentFinger.distalArtOffset.rotation);
 
                     currentFinger = controller.thumb;
+                    if (currentFinger.locked) return;
                     lastFoundAvatar.artTransforms.rightThumbProximal.SetPositionAndRotation(currentFinger.proximalArtOffset.position, currentFinger.proximalArtOffset.rotation);
                     lastFoundAvatar.artTransforms.rightThumbIntermediate.SetPositionAndRotation(currentFinger.intermediateArtOffset.position, currentFinger.intermediateArtOffset.rotation);
                     lastFoundAvatar.artTransforms.rightThumbDistal.SetPositionAndRotation(currentFinger.distalArtOffset.position, currentFinger.distalArtOffset.rotation);

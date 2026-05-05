@@ -9,7 +9,7 @@ namespace FingerPhysics;
 [RegisterTypeInIl2Cpp]
 public class PhysicalFinger : MonoBehaviour
 {
-    public const float fingerSectionMass = 0f;
+    public const float fingerSectionMass = 0.01f;
 
     public PhysicalFingersController controllerReference
     {
@@ -44,6 +44,23 @@ public class PhysicalFinger : MonoBehaviour
     public Transform distalArtOffset;
 
     public bool locked;
+    
+
+    static JointDrive proximalDefaultSlerp = new JointDrive()
+    {
+        positionSpring = 3000f,
+        positionDamper = 30f,
+        maximumForce = 9999999999
+    };
+
+    static JointDrive fingerBoneDefaultSlerp = new JointDrive()
+    {
+        positionSpring = 2000f,
+        positionDamper = 20f,
+        maximumForce = 9999999999
+    };
+
+    static JointDrive zeroedDrive = new JointDrive();
 
     public static PhysicalFinger CreateFinger(PhysHand handBody, Transform proxTarget, Transform intTarget, Transform distTarget, string name, Transform parent)
     {
@@ -62,6 +79,7 @@ public class PhysicalFinger : MonoBehaviour
             physFinger.proximalJoint.axis = Vector3.right;
             physFinger.proximalJoint.angularXMotion = ConfigurableJointMotion.Limited;
             physFinger.proximalJoint.angularYMotion = ConfigurableJointMotion.Limited;
+            //physFinger.proximalJoint.angularZMotion = ConfigurableJointMotion.Limited;
             physFinger.proximalJoint.highAngularXLimit = new SoftJointLimit()
             {
                 limit = 25f,
@@ -76,17 +94,12 @@ public class PhysicalFinger : MonoBehaviour
             }; 
             physFinger.proximalJoint.angularYLimit = new SoftJointLimit()
             {
-                limit = 45f,
+                limit = 25f,
                 bounciness = 0,
                 contactDistance = 0
             };
-            physFinger.proximalJoint.slerpDrive = new JointDrive()
-            {
-                positionSpring = 2000f,
-                positionDamper = 20f,
-                maximumForce = physFinger.proximalJoint.slerpDrive.maximumForce
-            }
-            ;
+
+            physFinger.proximalJoint.slerpDrive = proximalDefaultSlerp;
 
             //physFinger.proximalJoint.connectedMassScale = 0;
         }
@@ -130,7 +143,7 @@ public class PhysicalFinger : MonoBehaviour
             GameObject fingerBone = new GameObject($"{name} {extraName}");
             fingerBone.transform.SetParent(parent);
             fingerBone.transform.position = targetTransform.position;
-            fingerBone.transform.rotation = targetTransform.rotation;
+            fingerBone.transform.rotation = targetTransform.rotation; 
             if (rotOverride) fingerBone.transform.rotation = overrideQ;
             fingerBone.layer = 8;
 
@@ -149,19 +162,7 @@ public class PhysicalFinger : MonoBehaviour
             ConfigurableJoint boneJoint = fingerBone.AddComponent<ConfigurableJoint>();
             boneJoint.connectedBody = jointedBody;
             LockMotion(boneJoint);
-            boneJoint.anchor = Vector3.zero;
-            boneJoint.autoConfigureConnectedAnchor = false;
-            boneJoint.axis = Vector3.back;
-            boneJoint.rotationDriveMode = RotationDriveMode.Slerp;
-            boneJoint.slerpDrive = new JointDrive()
-            {
-                positionSpring = 1000f,
-                positionDamper = 5f,
-                maximumForce = boneJoint.slerpDrive.maximumForce
-            };
-            boneJoint.projectionMode = JointProjectionMode.PositionAndRotation;
-            boneJoint.projectionDistance = 0f;
-            boneJoint.projectionAngle = 0f;
+            Resetup(boneJoint);
 
             // Create Art Offset
             GameObject artOffset = new GameObject("artOffset");
@@ -211,8 +212,23 @@ public class PhysicalFinger : MonoBehaviour
         distalBody.detectCollisions = enabled;
     }
 
+    public static void Resetup(ConfigurableJoint boneJoint)
+    {
+
+        boneJoint.anchor = Vector3.zero;
+        boneJoint.autoConfigureConnectedAnchor = false;
+        boneJoint.axis = Vector3.back;
+        boneJoint.secondaryAxis = Vector3.zero;
+        boneJoint.rotationDriveMode = RotationDriveMode.Slerp;
+        boneJoint.slerpDrive = fingerBoneDefaultSlerp;
+        boneJoint.projectionMode = JointProjectionMode.PositionAndRotation;
+        boneJoint.projectionDistance = 0f;
+        boneJoint.projectionAngle = 0f;
+    }
+
     public void UpdateFingerAnchors()
     {
+        
         proximalJoint.connectedAnchor = controllerReference.handedness == Il2CppSLZ.Marrow.Interaction.Handedness.LEFT
             ? Quaternion.Euler(270, 90, 0) * proximalTarget.localPosition
             : Quaternion.Euler(90, 270, 0) * proximalTarget.localPosition;
@@ -230,6 +246,18 @@ public class PhysicalFinger : MonoBehaviour
 
     public void UpdateArtTransforms(Transform proximal, Transform intermediate, Transform distal)
     {
+        /*if (locked)
+        {
+            //proximalArtOffset.localPosition = proximalTarget.localPosition;
+            proximalArtOffset.localRotation = proximalTarget.localRotation;
+
+            //intermediateArtOffset.localPosition = intermediateTarget.localPosition;
+            intermediateArtOffset.localRotation = intermediateTarget.localRotation;
+
+            //distalArtOffset.localPosition = distalTarget.localPosition;
+            distalArtOffset.localRotation = distalTarget.localRotation;
+            return;
+        } */       
         proximalArtOffset.localPosition = proximal.localPosition;
         proximalArtOffset.localRotation = proximal.localRotation;
 
@@ -242,6 +270,19 @@ public class PhysicalFinger : MonoBehaviour
 
     public void UpdateJointTargets()
     {
+        
+        if (locked)
+        {
+            //proximalBody.transform.localPosition = proximalTarget.localPosition;
+            proximalBody.transform.localRotation = proximalTarget.localRotation;
+
+            //intermediateBody.transform.localPosition = intermediateTarget.localPosition;
+            intermediateBody.transform.localRotation = intermediateTarget.localRotation;
+
+            //distalBody.transform.localPosition = distalTarget.localPosition;
+            distalBody.transform.localRotation = distalTarget.localRotation;
+            return;
+        }
         proximalJoint.targetRotation = Quaternion.Inverse(proximalTarget.localRotation);
 
         intermediateJoint.targetRotation = Quaternion.AngleAxis(Quaternion.Angle(Quaternion.identity, intermediateTarget.localRotation), Vector3.right);
@@ -252,25 +293,39 @@ public class PhysicalFinger : MonoBehaviour
 
     public void FreeJoints()
     {
-        proximalJoint.angularXMotion = ConfigurableJointMotion.Limited;
-        proximalJoint.angularYMotion = ConfigurableJointMotion.Free;
-        proximalJoint.angularZMotion = ConfigurableJointMotion.Free;
+        //proximalJoint.autoConfigureConnectedAnchor = false;
+        Resetup(proximalJoint);
+        proximalJoint.axis = Vector3.right;
+        proximalBody.transform.position = proximalTarget.position;
+        proximalBody.transform.rotation = proximalTarget.rotation;
+        proximalBody.gameObject.SetActive(true);
 
-        intermediateJoint.angularXMotion = ConfigurableJointMotion.Limited;
-        intermediateJoint.angularYMotion = ConfigurableJointMotion.Locked;
-        intermediateJoint.angularZMotion = ConfigurableJointMotion.Locked;
+        Resetup(intermediateJoint);
+        intermediateBody.transform.position = intermediateTarget.position;
+        intermediateBody.transform.rotation = intermediateTarget.rotation;
+        intermediateBody.gameObject.SetActive(true);
 
-        distalJoint.angularXMotion = ConfigurableJointMotion.Limited;
-        distalJoint.angularYMotion = ConfigurableJointMotion.Locked;
-        distalJoint.angularZMotion = ConfigurableJointMotion.Locked;
+        Resetup(distalJoint);
+        distalBody.transform.position = distalTarget.position;
+        distalBody.transform.rotation = distalTarget.rotation;
+        distalBody.gameObject.SetActive(true);
+        
+        
 
-        //distalJoint.autoConfigureConnectedAnchor = true;
+
+
         locked = false;
     }
 
     public void LockJoints()
     {
-        proximalJoint.angularXMotion = ConfigurableJointMotion.Locked;
+        
+        proximalBody.gameObject.SetActive(false);
+        intermediateBody.gameObject.SetActive(false);
+        distalBody.gameObject.SetActive(false);
+        
+
+        /*proximalJoint.angularXMotion = ConfigurableJointMotion.Locked;
         proximalJoint.angularYMotion = ConfigurableJointMotion.Locked;
         proximalJoint.angularZMotion = ConfigurableJointMotion.Locked;
 
@@ -280,7 +335,26 @@ public class PhysicalFinger : MonoBehaviour
 
         distalJoint.angularXMotion = ConfigurableJointMotion.Locked;
         distalJoint.angularYMotion = ConfigurableJointMotion.Locked;
-        distalJoint.angularZMotion = ConfigurableJointMotion.Locked;
+        distalJoint.angularZMotion = ConfigurableJointMotion.Locked;*/
+
+        /*proximalJoint.angularXMotion = ConfigurableJointMotion.Free;
+        proximalJoint.angularYMotion = ConfigurableJointMotion.Free;
+        proximalJoint.angularZMotion = ConfigurableJointMotion.Free;
+
+        intermediateJoint.angularXMotion = ConfigurableJointMotion.Free;
+        intermediateJoint.angularYMotion = ConfigurableJointMotion.Free;
+        intermediateJoint.angularZMotion = ConfigurableJointMotion.Free;
+
+        distalJoint.angularXMotion = ConfigurableJointMotion.Free;
+        distalJoint.angularYMotion = ConfigurableJointMotion.Free;
+        distalJoint.angularZMotion = ConfigurableJointMotion.Free;*/
+
+
+        //proximalBody.isKinematic = true;
+        //intermediateBody.isKinematic = true;
+
+        //distalBody.constraints = RigidbodyConstraints.FreezeAll;
+        
 
 
         locked = true;
