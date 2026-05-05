@@ -27,6 +27,10 @@ public class PhysicalFingersController : MonoBehaviour
     private bool _previousAttachedState = false;
 
 
+    private float _timeSinceLastRelease = 0f;
+    private bool _waitingToEnableCollisions = false;
+
+
     public void OnAvatarSwapped(Avatar avatar)
     {
         thumb.UpdateFingerAnchors();
@@ -53,6 +57,37 @@ public class PhysicalFingersController : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        _timeSinceLastRelease += Time.deltaTime;
+        if (_timeSinceLastRelease > 0.5f && _waitingToEnableCollisions)
+        {
+            SetCollisions(true);
+            _waitingToEnableCollisions = false;
+        }
+    }
+
+    public void OnGrabbedInteractable()
+    {
+        SetCollisions(false);
+        _waitingToEnableCollisions = false;
+    }
+
+    public void OnReleasedInteractable()
+    {
+        _timeSinceLastRelease = 0f;
+        _waitingToEnableCollisions = true;
+    }
+
+    public void SetCollisions(bool collide)
+    {
+        thumb.SetCollisions(collide);
+        index.SetCollisions(collide);
+        middle.SetCollisions(collide);
+        ring.SetCollisions(collide);
+        pinky.SetCollisions(collide);
+    }
+
     public void OnApplyPoseToTransforms()
     {
         thumb.UpdateJointTargets();
@@ -68,12 +103,15 @@ public class PhysicalFingersController : MonoBehaviour
 
         if (_previousAttachedState != (targetPhysHand.hand.AttachedReceiver != null) || thumb.locked)
         {
-            _previousAttachedState = (targetPhysHand.hand.AttachedReceiver != null || targetPhysHand.hand.HoveringReceiver != null) || thumb.locked;
-            thumb.SetCollisions(!_previousAttachedState);
-            index.SetCollisions(!_previousAttachedState);
-            middle.SetCollisions(!_previousAttachedState);
-            ring.SetCollisions(!_previousAttachedState);
-            pinky.SetCollisions(!_previousAttachedState);
+            _previousAttachedState = (targetPhysHand.hand.AttachedReceiver != null);
+            if (_previousAttachedState)
+            {
+                OnGrabbedInteractable();
+            }
+            else
+            {
+                OnReleasedInteractable();
+            }
         }
 
         if (Vector3.Distance(targetPhysHand.transform.position, Player.Head.position) >= 30)
